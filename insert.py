@@ -1,4 +1,8 @@
-from string import ascii_lowercase
+import random, string
+            
+def generateNodeIndex():
+    x = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(8))
+    return x
 
 def generateDict(val = ""):
     my_dict = dict()
@@ -7,28 +11,43 @@ def generateDict(val = ""):
     my_dict[val+" "] = dict()
     return my_dict
 
+def getNextVal(temp_dict, my_str):
+    x = 0
+    for i in range(len(temp_dict[my_str])):
+        x += 1
+    return x
+
+def tryInsert(temp_dict, my_str, doc_meta, i, str):
+    node = False
+    node_index = generateNodeIndex()
+    if i==len(str)-1:
+        index_val = getNextVal(temp_dict, my_str)
+        temp_dict[my_str][index_val] = doc_meta
+    else:
+        temp_dict[my_str][-1] = node_index
+        node = True
+    return temp_dict, node, node_index
+
 def insertKeyword(doc_meta, keyword):    
-    str = keyword.strip()
-    str = str.lower()
+    str = keyword.strip().lower()
     my_str = ""
     val = ""
+    node = False
     for i in range(len(str)):
+        if node==True:
+            print("Node Index: "+node_index)
         temp_dict = generateDict(my_str)
         my_str += str[i]
-        if i==len(str)-1:
-            temp_dict[my_str][0] = doc_meta
-        else:
-            temp_dict[my_str][-1] = "node"
+        temp_dict, node, node_index = tryInsert(temp_dict, my_str, doc_meta, i, str)
         print(temp_dict)
         print("\n")
-#print(generateDict("s"))
 
 def insertDoc(doc_meta):
     keywords = doc_meta["keywords"]
     keywords = [x.strip() for x in keywords.split(',')]
     for i in range(len(keywords)):
         #my_keyword = keywords[i].strip()
-        print(keywords[i])
+        print("Insert Keyword: "+keywords[i])
         insertKeyword(doc_meta, keywords[i])
 
 doc_meta = dict()
