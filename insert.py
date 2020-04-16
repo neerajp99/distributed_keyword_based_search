@@ -8,6 +8,7 @@ import random, string, json, os
 ext = ".txt"
 customDirectory = "files"
 
+#Fixed Working Directories
 dir_path = os.getcwd()
 dir_path += "\ ".strip()+customDirectory
 if customDirectory!="":
@@ -25,12 +26,9 @@ def cleanDir():
 def commit(data, file_name, newDict, node_index, node, my_str, index_val, doc_meta):
     data = json.dumps(data)
     if newDict==False:
-        #print(customDirectory+file_name)
         f_r = open(customDirectory+file_name)
         content = f_r.read()
         f = open(customDirectory+file_name, "w")
-        print("Content")
-        print(content)
         content = json.loads(content)
         if node == True:
             content[my_str][-1] = node_index
@@ -41,7 +39,6 @@ def commit(data, file_name, newDict, node_index, node, my_str, index_val, doc_me
     else:
         f = open(customDirectory+file_name, "w")
         f.write(data)
-    #print(data)
     
 def generateNodeIndex(str, i):
     x = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(7))
@@ -94,9 +91,6 @@ def insertKeyword(doc_meta, keyword):
     file_name = "root"+ext
     node = False
     for i in range(len(str)):
-        if node:
-            pass
-            #print("Node Index: "+node_index)
         temp_dict, newDict = fetchDict(my_str, str, i, file_name)
         print("New File:")
         print(newDict)
@@ -104,18 +98,15 @@ def insertKeyword(doc_meta, keyword):
         temp_dict, node, node_index, index_val = tryInsert(temp_dict, my_str, doc_meta, i, str, newDict)
         commit(temp_dict, file_name, newDict, node_index, node, my_str, index_val, doc_meta)
         file_name = node_index
-        #print("\n")
     print("Keyword Inserted Successfully: "+str+"\n\n")
 
 def insertDoc(doc_meta):
     keywords = doc_meta["keywords"]
     keywords = [x.strip() for x in keywords.split(',')]
     for i in range(len(keywords)):
-        #my_keyword = keywords[i].strip()
-        #print("Insert Keyword: "+keywords[i])
         insertKeyword(doc_meta, keywords[i])
 
-cleanDir()
+#cleanDir()
 doc_meta = dict()
 doc_meta["url"] = "https://www.youtube.com"
 doc_meta["title"] = "YouTube"
