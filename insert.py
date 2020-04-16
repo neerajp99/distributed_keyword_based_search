@@ -131,18 +131,39 @@ def insertDoc(doc_meta):
     for i in range(len(keywords)):
         insertKeyword(doc_meta, keywords[i])
 
-#cleanDir()
-doc_meta = dict()
-doc_meta["url"] = "https://www.youtube.com"
-doc_meta["title"] = "YouTube"
-doc_meta["keywords"] = "search, video, sharing, camera phone, video phone, free, upload"
-doc_meta["description"] = "Enjoy the videos and music you love, upload original content, and share it all with friends, family, and the world on YouTube."
-insertDoc(doc_meta)
+# cleanDir()
+# doc_meta = dict()
+# doc_meta["url"] = "https://www.youtube.com"
+# doc_meta["title"] = "YouTube"
+# doc_meta["keywords"] = "search, video, sharing, camera phone, video phone, free, upload"
+# doc_meta["description"] = "Enjoy the videos and music you love, upload original content, and share it all with friends, family, and the world on YouTube."
+# insertDoc(doc_meta)
 
-doc_meta2 = dict()
-doc_meta2["url"] = "https://in.yahoo.com"
-doc_meta2["title"] = "Yahoo India | News, Finance, Cricket, Lifestyle and Entertainment"
-doc_meta2["keywords"] = "search, yahoo, yahoo home page, yahoo homepage, yahoo search, yahoo mail, yahoo messenger, yahoo games, news, finance, sport, entertainment"
-doc_meta2["description"] = "Get latest news, email, live cricket scores and fresh finance, lifestyle, entertainment content daily."
-insertDoc(doc_meta2)
+# doc_meta2 = dict()
+# doc_meta2["url"] = "https://in.yahoo.com"
+# doc_meta2["title"] = "Yahoo India | News, Finance, Cricket, Lifestyle and Entertainment"
+# doc_meta2["keywords"] = "search, yahoo, yahoo home page, yahoo homepage, yahoo search, yahoo mail, yahoo messenger, yahoo games, news, finance, sport, entertainment"
+# doc_meta2["description"] = "Get latest news, email, live cricket scores and fresh finance, lifestyle, entertainment content daily."
+# insertDoc(doc_meta2)
+
+# Test Data 
+
+# json_data_path = pathlib.Path(__file__).parent.absolute()
+json_data_path = str(Path().absolute())
+path_to_find = json_data_path + "/scrap_synonyms/scrap_synonyms/check.json"
+
+# Open the json file 
+with open(path_to_find) as fi:
+    data_content = json.loads(fi.read())
+# print(data_content[0]['url'])
+
+# Loop over the data, and call the insertDoc operation 
+
+for i in range(len(data_content)):
+    doc_meta = dict()
+    doc_meta["url"] = data_content[i]['url']
+    doc_meta["title"] = data_content[i]['title']
+    doc_meta["keywords"] = data_content[i]['keywords']
+    doc_meta["description"] = data_content[i]['description']
+    insertDoc(doc_meta)
     
