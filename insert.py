@@ -22,18 +22,40 @@ def cleanDir():
         if item.endswith(ext):
             os.remove(os.path.join(dir_path, item))
    
-            
+def strtoint(lst):
+    for i in range(0, len(lst)): 
+        lst[i] = int(lst[i])    
+    return lst       
+
 def commit(data, file_name, newDict, node_index, node, my_str, index_val, doc_meta):
     data = json.dumps(data)
+    add = True
     if newDict==False:
         f_r = open(customDirectory+file_name)
         content = f_r.read()
-        f = open(customDirectory+file_name, "w")
         content = json.loads(content)
+        f = open(customDirectory+file_name, "w")
         if node == True:
-            content[my_str][-1] = node_index
+            content[my_str]["-1"] = node_index
         else:
-            content[my_str][index_val] = doc_meta
+            x = 0
+            my_keys = list(content[my_str])
+            my_keys = max(strtoint(my_keys))
+            for i in range(my_keys):
+                #print(list(content[my_str]).index(str(i)))
+                if list(content[my_str])[i]=="-1":
+                    continue
+                else:
+                    if "url" in content[my_str][str(i)]:
+                        print(content[my_str][str(i)]["url"])
+                        if content[my_str][str(i)]["url"]==doc_meta["url"]:
+                            content[my_str][str(i)] = doc_meta
+                            add = False
+                            break
+                        else:
+                            x += 1
+            if add:
+                content[my_str][x] = doc_meta
         content = json.dumps(content)
         f.write(content)
     else:
@@ -41,7 +63,7 @@ def commit(data, file_name, newDict, node_index, node, my_str, index_val, doc_me
         f.write(data)
     
 def generateNodeIndex(str, i):
-    x = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(7))
+    #x = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(7))
     x = ""
     for j in range(i+1):x += str[j]
     x += ext
@@ -62,6 +84,7 @@ def fetchDict(val, str, i, file_name):
         print("\n"+customDirectory+x)
         newDict = False
     except:
+        newDict = True
         print("\n"+customDirectory+x)
     return generateDict(val), newDict
 
@@ -86,6 +109,7 @@ def tryInsert(temp_dict, my_str, doc_meta, i, str, newDict):
 
 def insertKeyword(doc_meta, keyword):    
     str = keyword.strip().lower()
+    #str = str.replace(" ", "$")
     my_str = ""
     val = ""
     file_name = "root"+ext
@@ -109,7 +133,7 @@ def insertDoc(doc_meta):
 #cleanDir()
 doc_meta = dict()
 doc_meta["url"] = "https://www.youtube.com"
-doc_meta["title"] = "YouTube"
+doc_meta["title"] = "YouTubeX"
 doc_meta["keywords"] = "video, sharing, camera phone, video phone, free, upload"
 doc_meta["description"] = "Enjoy the videos and music you love, upload original content, and share it all with friends, family, and the world on YouTube."
 insertDoc(doc_meta)
