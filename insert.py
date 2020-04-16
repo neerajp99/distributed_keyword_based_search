@@ -3,6 +3,7 @@ from string import ascii_lowercase
 from pathlib import Path
 from os import path
 import random, string, json, os
+import csv
 
 #Settings
 ext = ".txt"
@@ -150,20 +151,30 @@ def insertDoc(doc_meta):
 
 # json_data_path = pathlib.Path(__file__).parent.absolute()
 json_data_path = str(Path().absolute())
-path_to_find = json_data_path + "/scrap_synonyms/scrap_synonyms/check.json"
+path_to_find = json_data_path + "/scrap_synonyms/scrap_synonyms/data.csv"
 
-# Open the json file 
-with open(path_to_find) as fi:
-    data_content = json.loads(fi.read())
+# # Open the json file 
+# with open(path_to_find) as fi:
+#     data_content = json.loads(fi.read())
 # print(data_content[0]['url'])
+
+with open(path_to_find, mode = 'r') as fi:
+    data_content = csv.reader(fi, delimiter=',')
+    for line in data_content:
+        doc_meta = dict()
+        doc_meta["url"] = line[0]
+        doc_meta["title"] = line[1]
+        doc_meta["keywords"] = line[2]
+        doc_meta["description"] = line[3]
+        insertDoc(doc_meta)
 
 # Loop over the data, and call the insertDoc operation 
 
-for i in range(len(data_content)):
-    doc_meta = dict()
-    doc_meta["url"] = data_content[i]['url']
-    doc_meta["title"] = data_content[i]['title']
-    doc_meta["keywords"] = data_content[i]['keywords']
-    doc_meta["description"] = data_content[i]['description']
-    insertDoc(doc_meta)
+# for i in range(len(data_content)):
+#     doc_meta = dict()
+#     doc_meta["url"] = data_content[i]['url']
+#     doc_meta["title"] = data_content[i]['title']
+#     doc_meta["keywords"] = data_content[i]['keywords']
+#     doc_meta["description"] = data_content[i]['description']
+#     insertDoc(doc_meta)
     
