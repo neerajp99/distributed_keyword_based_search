@@ -15,7 +15,6 @@ if customDirectory!="":
     Path(customDirectory).mkdir(parents=True, exist_ok=True)
     customDirectory += "/"
 
-
 def cleanDir():
     test = os.listdir(dir_path)
     for item in test:
@@ -39,23 +38,25 @@ def commit(data, file_name, newDict, node_index, node, my_str, index_val, doc_me
             content[my_str]["-1"] = node_index
         else:
             x = 0
-            my_keys = list(content[my_str])
-            my_keys = max(strtoint(my_keys))
+            my_keys = len(list(content[my_str]))
+            #my_keys = max(strtoint(my_keys))
             for i in range(my_keys):
                 #print(list(content[my_str]).index(str(i)))
                 if list(content[my_str])[i]=="-1":
                     continue
                 else:
-                    if "url" in content[my_str][str(i)]:
-                        print(content[my_str][str(i)]["url"])
-                        if content[my_str][str(i)]["url"]==doc_meta["url"]:
-                            content[my_str][str(i)] = doc_meta
-                            add = False
-                            break
-                        else:
+                    try:
+                        if "url" in content[my_str][str(i)]:
                             x += 1
+                            if content[my_str][str(i)]["url"]==doc_meta["url"]:
+                                content[my_str][str(i)] = doc_meta
+                                
+                                add = False
+                                break
+                    except KeyError:
+                        continue
             if add:
-                content[my_str][x] = doc_meta
+                content[my_str][str(x+1)] = doc_meta
         content = json.dumps(content)
         f.write(content)
     else:
@@ -133,8 +134,15 @@ def insertDoc(doc_meta):
 #cleanDir()
 doc_meta = dict()
 doc_meta["url"] = "https://www.youtube.com"
-doc_meta["title"] = "YouTubeX"
-doc_meta["keywords"] = "video, sharing, camera phone, video phone, free, upload"
+doc_meta["title"] = "YouTube"
+doc_meta["keywords"] = "search, video, sharing, camera phone, video phone, free, upload"
 doc_meta["description"] = "Enjoy the videos and music you love, upload original content, and share it all with friends, family, and the world on YouTube."
 insertDoc(doc_meta)
+
+doc_meta2 = dict()
+doc_meta2["url"] = "https://in.yahoo.com"
+doc_meta2["title"] = "Yahoo India | News, Finance, Cricket, Lifestyle and Entertainment"
+doc_meta2["keywords"] = "search, yahoo, yahoo home page, yahoo homepage, yahoo search, yahoo mail, yahoo messenger, yahoo games, news, finance, sport, entertainment"
+doc_meta2["description"] = "Get latest news, email, live cricket scores and fresh finance, lifestyle, entertainment content daily."
+insertDoc(doc_meta2)
     
