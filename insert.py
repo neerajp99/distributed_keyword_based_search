@@ -22,10 +22,25 @@ def cleanDir():
             os.remove(os.path.join(dir_path, item))
    
             
-def commit(data, file_name):
+def commit(data, file_name, newDict, node_index, node, my_str, index_val, doc_meta):
     data = json.dumps(data)
-    f = open(customDirectory+file_name, "w")
-    f.write(data)
+    if newDict==False:
+        #print(customDirectory+file_name)
+        f_r = open(customDirectory+file_name)
+        content = f_r.read()
+        f = open(customDirectory+file_name, "w")
+        print("Content")
+        print(content)
+        content = json.loads(content)
+        if node == True:
+            content[my_str][-1] = node_index
+        else:
+            content[my_str][index_val] = doc_meta
+        content = json.dumps(content)
+        f.write(content)
+    else:
+        f = open(customDirectory+file_name, "w")
+        f.write(data)
     #print(data)
     
 def generateNodeIndex(str, i):
@@ -42,28 +57,16 @@ def generateDict(val = ""):
     my_dict[val+" "] = dict()
     return my_dict
 
-def generateDict_files(val = ""):
-    if(val==""):
-        my_dict = readJSON("root")
-        
-    my_dict = dict()
-    for i in ascii_lowercase:
-        my_dict[val+i] = dict()
-    my_dict[val+" "] = dict()
-    return my_dict
-
-def fetchDict(val, str, i):
+def fetchDict(val, str, i, file_name):
     newDict = True
-    x = ""
-    for j in range(i+1):x += str[j]
-    if path.exists(x+ext):
+    x = file_name
+    try:
+        open(customDirectory+x, "r")
+        print("\n"+customDirectory+x)
         newDict = False
-        f = open(customDirectory+x+ext, "r")
-        print("OLDDDDDDDD")
-        print(f)
-        return f, newDict
-    else:
-        return generateDict(val), newDict
+    except:
+        print("\n"+customDirectory+x)
+    return generateDict(val), newDict
 
 def getNextVal(temp_dict, my_str):
     x = 0
@@ -74,8 +77,7 @@ def getNextVal(temp_dict, my_str):
 def tryInsert(temp_dict, my_str, doc_meta, i, str, newDict):
     node = False
     node_index = ""
-    if newDict:
-        print(my_str)
+    index_val = -1
     if i==len(str)-1:
         index_val = getNextVal(temp_dict, my_str)
         temp_dict[my_str][index_val] = doc_meta
@@ -83,7 +85,7 @@ def tryInsert(temp_dict, my_str, doc_meta, i, str, newDict):
         node_index = generateNodeIndex(str, i)
         temp_dict[my_str][-1] = node_index
         node = True
-    return temp_dict, node, node_index
+    return temp_dict, node, node_index, index_val
 
 def insertKeyword(doc_meta, keyword):    
     str = keyword.strip().lower()
@@ -95,13 +97,16 @@ def insertKeyword(doc_meta, keyword):
         if node:
             pass
             #print("Node Index: "+node_index)
-        temp_dict, newDict = fetchDict(my_str, str, i)
+        temp_dict, newDict = fetchDict(my_str, str, i, file_name)
+        print("New File:")
+        print(newDict)
         my_str += str[i]
-        temp_dict, node, node_index = tryInsert(temp_dict, my_str, doc_meta, i, str, newDict)
-        commit(temp_dict, file_name)
+        temp_dict, node, node_index, index_val = tryInsert(temp_dict, my_str, doc_meta, i, str, newDict)
+        commit(temp_dict, file_name, newDict, node_index, node, my_str, index_val, doc_meta)
         file_name = node_index
         #print("\n")
     print("Keyword Inserted Successfully: "+str+"\n\n")
+
 def insertDoc(doc_meta):
     keywords = doc_meta["keywords"]
     keywords = [x.strip() for x in keywords.split(',')]
