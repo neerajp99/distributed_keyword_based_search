@@ -65,6 +65,7 @@ def searchKeyword(keyword):
 	else:
 		return found
 
-search = "video"
+
+search = "yahoo"
 
 print(searchKeyword(search))
