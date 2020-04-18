@@ -2,7 +2,7 @@
 from string import ascii_lowercase
 from pathlib import Path
 from os import path
-import random, string, json, os
+import random, string, json, os, sys
 
 #Settings
 ext = ".txt"
@@ -28,6 +28,7 @@ def leafSearch(my_str, i, keyword, file_name):
 	end = False
 	f = open(customDirectory+file_name)
 	content = f.read()
+	#print(customDirectory+file_name)
 	content = json.loads(content)
 	if i<len(keyword)-1:
 		if "-1" in content[my_str].keys():
@@ -66,6 +67,6 @@ def searchKeyword(keyword):
 		return found
 
 
-search = "yahoo"
+search = str(sys.argv[0])
 
 print(searchKeyword(search))
