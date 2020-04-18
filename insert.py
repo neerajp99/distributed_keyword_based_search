@@ -2,8 +2,7 @@
 from string import ascii_lowercase
 from pathlib import Path
 from os import path
-import random, string, json, os
-import csv
+import random, string, json, os, unidecode, csv
 
 #Settings
 ext = ".txt"
@@ -91,27 +90,50 @@ def fetchDict(val, str, i, file_name):
     return generateDict(val), newDict
 
 def getNextVal(temp_dict, my_str):
+    enum = True
     x = 0
-    for i in range(len(temp_dict[my_str])):
-        x += 1
-    return x
+    #print(temp_dict[my_str])
+    try:
+        for i in range(len(temp_dict[my_str])):
+            x += 1
+    except:
+        enum = False
+    return x, enum
 
 def tryInsert(temp_dict, my_str, doc_meta, i, str, newDict):
     node = False
+    enum = True
     node_index = ""
     index_val = -1
     if i==len(str)-1:
-        index_val = getNextVal(temp_dict, my_str)
-        temp_dict[my_str][index_val] = doc_meta
+        index_val, enum = getNextVal(temp_dict, my_str)
+        try:
+            temp_dict[my_str][index_val] = doc_meta
+        except:
+            enum = False
     else:
         node_index = generateNodeIndex(str, i)
-        temp_dict[my_str][-1] = node_index
+        try:
+            temp_dict[my_str][-1] = node_index
+        except KeyError:
+            enum = False
         node = True
-    return temp_dict, node, node_index, index_val
+    return temp_dict, node, node_index, index_val, enum
+
+def refineKeyword(keyword):
+    str1 = keyword.strip().lower()
+    str1 = str1.replace(".", " ")
+    str1 = str1.replace("-", " ")
+    str1 = str1.replace(";", " ")
+    str1 = str1.replace("&", " and ")
+    str1 = unidecode.unidecode(str1)
+    str1.encode('ascii', 'ignore')
+    print(str1)
+    return str1
 
 def insertKeyword(doc_meta, keyword):    
-    str = keyword.strip().lower()
-    #str = str.replace(" ", "$")
+    print(keyword)
+    str = refineKeyword(keyword)
     my_str = ""
     val = ""
     file_name = "root"+ext
@@ -121,60 +143,61 @@ def insertKeyword(doc_meta, keyword):
         print("New File:")
         print(newDict)
         my_str += str[i]
-        temp_dict, node, node_index, index_val = tryInsert(temp_dict, my_str, doc_meta, i, str, newDict)
-        commit(temp_dict, file_name, newDict, node_index, node, my_str, index_val, doc_meta)
-        file_name = node_index
+        temp_dict, node, node_index, index_val, enum = tryInsert(temp_dict, my_str, doc_meta, i, str, newDict)
+        if enum:
+            try:
+                commit(temp_dict, file_name, newDict, node_index, node, my_str, index_val, doc_meta)
+            except:
+                pass
+            file_name = node_index
     print("Keyword Inserted Successfully: "+str+"\n\n")
 
 def insertDoc(doc_meta):
     keywords = doc_meta["keywords"]
     keywords = [x.strip() for x in keywords.split(',')]
     for i in range(len(keywords)):
-        insertKeyword(doc_meta, keywords[i])
+        if keywords[i].isalnum() and keywords[i][0]!="c":
+            insertKeyword(doc_meta, keywords[i])
 
-# cleanDir()
-# doc_meta = dict()
-# doc_meta["url"] = "https://www.youtube.com"
-# doc_meta["title"] = "YouTube"
-# doc_meta["keywords"] = "search, video, sharing, camera phone, video phone, free, upload"
-# doc_meta["description"] = "Enjoy the videos and music you love, upload original content, and share it all with friends, family, and the world on YouTube."
-# insertDoc(doc_meta)
+def jsonread():
+    # json_data_path = pathlib.Path(__file__).parent.absolute()
+    json_data_path = str(Path().absolute())
+    path_to_find = json_data_path + "/data/check1.json"
 
-# doc_meta2 = dict()
-# doc_meta2["url"] = "https://in.yahoo.com"
-# doc_meta2["title"] = "Yahoo India | News, Finance, Cricket, Lifestyle and Entertainment"
-# doc_meta2["keywords"] = "search, yahoo, yahoo home page, yahoo homepage, yahoo search, yahoo mail, yahoo messenger, yahoo games, news, finance, sport, entertainment"
-# doc_meta2["description"] = "Get latest news, email, live cricket scores and fresh finance, lifestyle, entertainment content daily."
-# insertDoc(doc_meta2)
+    # Open the json file 
+    with open(path_to_find) as fi:
+        data_content = json.loads(fi.read())
+    # print(data_content[0]['url'])
 
-# Test Data 
+    # Loop over the data, and call the insertDoc operation 
 
-# json_data_path = pathlib.Path(__file__).parent.absolute()
-json_data_path = str(Path().absolute())
-path_to_find = json_data_path + "/scrap_synonyms/scrap_synonyms/data.csv"
-
-# # Open the json file 
-# with open(path_to_find) as fi:
-#     data_content = json.loads(fi.read())
-# print(data_content[0]['url'])
-
-with open(path_to_find, mode = 'r') as fi:
-    data_content = csv.reader(fi, delimiter=',')
-    for line in data_content:
+    for i in range(len(data_content)):
         doc_meta = dict()
-        doc_meta["url"] = line[0]
-        doc_meta["title"] = line[1]
-        doc_meta["keywords"] = line[2]
-        doc_meta["description"] = line[3]
-        insertDoc(doc_meta)
+        doc_meta["url"] = data_content[i]['url']
+        doc_meta["title"] = data_content[i]['title']
+        doc_meta["keywords"] = data_content[i]['keywords']
+        doc_meta["description"] = data_content[i]['description']
+        if data_content[i]['keywords']!="":
+            insertDoc(doc_meta)
 
-# Loop over the data, and call the insertDoc operation 
+def csvread():
+    with open('data/book.csv') as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        line_count = 0
+        for row in csv_reader:
+            if line_count == 0:
+                print(f'Column names are {", ".join(row)}')
+                line_count += 1
+            else:
+                doc_meta = dict()
+                doc_meta["url"] = row[0]
+                doc_meta["title"] = row[1]
+                doc_meta["keywords"] = row[2]
+                doc_meta["description"] = row[3]
+                if doc_meta['keywords']!="":
+                    insertDoc(doc_meta)
+                line_count += 1
+                break
 
-# for i in range(len(data_content)):
-#     doc_meta = dict()
-#     doc_meta["url"] = data_content[i]['url']
-#     doc_meta["title"] = data_content[i]['title']
-#     doc_meta["keywords"] = data_content[i]['keywords']
-#     doc_meta["description"] = data_content[i]['description']
-#     insertDoc(doc_meta)
-    
+cleanDir()
+csvread()
